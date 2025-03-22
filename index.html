@@ -245,7 +245,7 @@ function animateVisualizer() {
   }
   let avg = sum / bufferLength;
   let scale = 1 + (avg / 255) * 0.5;
-  document.getElementById("img.profilePicture").style.transform = "scale(" + scale + ")";
+  document.getElementById("profilePicture").style.transform = "scale(" + scale + ")";
   requestAnimationFrame(animateVisualizer);
 }
 
