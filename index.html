@@ -162,7 +162,7 @@
     <div id="particles-js"></div>
   </head>
   <body>
-    <div class="overlay" onclick="enterSite()">Click to Enter</div>
+    <div class="overlay" id="enter" onclick="enterSite()">Click to Enter</div>
     <div class="container">
       <img src="https://voucan.github.io/vcngrey.png" alt="Voucan" id="profilePicture">
       <h1>Voucan</h1>
@@ -226,6 +226,36 @@
           this.classList.remove('spin');
         });
       });
+
+const audioElement = document.getElementById("enterAudio");
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const analyser = audioCtx.createAnalyser();
+analyser.fftSize = 256;
+const bufferLength = analyser.frequencyBinCount;
+const dataArray = new Uint8Array(bufferLength);
+const source = audioCtx.createMediaElementSource(audioElement);
+source.connect(analyser);
+analyser.connect(audioCtx.destination);
+
+function animateVisualizer() {
+  analyser.getByteFrequencyData(dataArray);
+  let sum = 0;
+  for (let i = 0; i < bufferLength; i++) {
+    sum += dataArray[i];
+  }
+  let avg = sum / bufferLength;
+  let scale = 1 + (avg / 255) * 0.5;
+  document.getElementById("img.profilePicture").style.transform = "scale(" + scale + ")";
+  requestAnimationFrame(animateVisualizer);
+}
+
+document.getElementById("enter").addEventListener("click", function () {
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+  audioElement.play();
+  animateVisualizer();
+});
     </script>
   </body>
 </html>
