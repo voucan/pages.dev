@@ -269,10 +269,12 @@
 
   profilePicture.addEventListener('mouseover', () => {
     isHovered = true;
+    profilePicture.style.transform = 'scale(1.2)';
   });
 
   profilePicture.addEventListener('mouseout', () => {
     isHovered = false;
+    profilePicture.style.transform = 'scale(1)';
   });
 </script>
   </body>
