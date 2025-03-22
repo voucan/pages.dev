@@ -202,64 +202,78 @@
     <audio id="spinAudio">
       <source src="/spin.mp3" type="audio/mp3">
     </audio>
-    <script>
-      function enterSite() {
-        document.querySelector('.overlay').classList.add('fade-out');
-        document.getElementById('profileContainer').classList.add('show');
-        const enterAudio = document.getElementById('enterAudio');
-        enterAudio.play().catch(error => {
-          console.log('Audio play failed:', error);
-        });
+<script>
+  function enterSite() {
+    document.querySelector('.overlay').classList.add('fade-out');
+    document.getElementById('profileContainer').classList.add('show');
+    const enterAudio = document.getElementById('enterAudio');
+    enterAudio.play().catch(error => {
+      console.log('Audio play failed:', error);
+    });
+  }
+
+  const hoverAudio = document.getElementById('hoverAudio');
+  const elementsToHover = document.querySelectorAll('button, img, .icons a');
+
+  elementsToHover.forEach(element => {
+    element.addEventListener('mouseover', () => {
+      hoverAudio.play();
+    });
+  });
+
+  document.getElementById('profilePicture').addEventListener('click', function() {
+    this.classList.add('spin');
+    const spinAudio = document.getElementById('spinAudio');
+    spinAudio.play();
+    
+    this.addEventListener('animationend', function() {
+      this.classList.remove('spin');
+    });
+  });
+
+  const audioElement = document.getElementById("enterAudio");
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 256;
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+  const source = audioCtx.createMediaElementSource(audioElement);
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+
+  let isHovered = false;
+
+  function animateVisualizer() {
+    if (!isHovered) {
+      analyser.getByteFrequencyData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        sum += dataArray[i];
       }
-
-      const hoverAudio = document.getElementById('hoverAudio');
-      const elementsToHover = document.querySelectorAll('button, img, .icons a');
-
-      elementsToHover.forEach(element => {
-        element.addEventListener('mouseover', () => {
-          hoverAudio.play();
-        });
-      });
-
-      document.getElementById('profilePicture').addEventListener('click', function() {
-        this.classList.add('spin');
-        const spinAudio = document.getElementById('spinAudio');
-        spinAudio.play();
-        
-        this.addEventListener('animationend', function() {
-          this.classList.remove('spin');
-        });
-      });
-
-const audioElement = document.getElementById("enterAudio");
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const analyser = audioCtx.createAnalyser();
-analyser.fftSize = 256;
-const bufferLength = analyser.frequencyBinCount;
-const dataArray = new Uint8Array(bufferLength);
-const source = audioCtx.createMediaElementSource(audioElement);
-source.connect(analyser);
-analyser.connect(audioCtx.destination);
-
-function animateVisualizer() {
-  analyser.getByteFrequencyData(dataArray);
-  let sum = 0;
-  for (let i = 0; i < bufferLength; i++) {
-    sum += dataArray[i];
+      let avg = sum / bufferLength;
+      let scale = 1 + (avg / 255) * 0.5;
+      document.getElementById("profilePicture").style.transform = "scale(" + scale + ")";
+    }
+    requestAnimationFrame(animateVisualizer);
   }
-  let avg = sum / bufferLength;
-  let scale = 1 + (avg / 255) * 0.5;
-  document.getElementById("profilePicture").style.transform = "scale(" + scale + ")";
-  requestAnimationFrame(animateVisualizer);
-}
 
-document.getElementById("enter").addEventListener("click", function () {
-  if (audioCtx.state === "suspended") {
-    audioCtx.resume();
-  }
-  audioElement.play();
-  animateVisualizer();
-});
-    </script>
+  document.getElementById("enter").addEventListener("click", function () {
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+    audioElement.play();
+    animateVisualizer();
+  });
+
+  const profilePicture = document.getElementById('profilePicture');
+
+  profilePicture.addEventListener('mouseover', () => {
+    isHovered = true;
+  });
+
+  profilePicture.addEventListener('mouseout', () => {
+    isHovered = false;
+  });
+</script>
   </body>
 </html>
